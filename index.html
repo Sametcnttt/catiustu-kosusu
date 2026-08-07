@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Çatıüstü Koşusu</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Manrope:wght@500;700;800&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+height: 100%;
+background: #0E1530;
+overflow: hidden;
+font-family: 'Manrope', sans-serif;
+touch-action: manipulation;
+}
+#wrap {
+position: relative;
+width: 100vw;
+height: 100vh;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+canvas {
+display: block;
+max-width: 100vw;
+max-height: 100vh;
+background: #0E1530;
+}
+#hud {
+position: absolute;
+top: 18px;
+left: 0;
+right: 0;
+display: flex;
+justify-content: space-between;
+padding: 0 20px;
+pointer-events: none;
+color: #F4E4C8;
+font-family: 'Manrope', sans-serif;
+}
+.hud-pill {
+background: rgba(14, 21, 48, 0.55);
+border: 1px solid rgba(240, 192, 90, 0.35);
+border-radius: 999px;
+padding: 6px 16px;
+font-weight: 800;
+font-size: 15px;
+letter-spacing: 0.02em;
+backdrop-filter: blur(4px);
+}
+.hud-pill.gold { color: #F0C05A; }
+#overlay {
+position: absolute;
+inset: 0;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+text-align: center;
+background: linear-gradient(180deg, rgba(14,21,48,0.55), rgba(14,21,48,0.88));
+color: #F4E4C8;
+padding: 24px;
+}
+#overlay h1 {
+font-family: 'Cinzel', serif;
+font-weight: 800;
+font-size: clamp(28px, 7vw, 44px);
+color: #F0C05A;
+letter-spacing: 0.02em;
+text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+#overlay .sub {
+margin-top: 10px;
+font-size: 15px;
+color: #C9B8A0;
+max-width: 320px;
+line-height: 1.5;
+}
+#overlay .stat-row {
+display: flex;
+gap: 28px;
+margin-top: 22px;
+}
+.stat {
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+.stat .num {
+font-family: 'Cinzel', serif;
+font-size: 26px;
+font-weight: 800;
+color: #F0C05A;
+}
+.stat .lbl {
+font-size: 11px;
+text-transform: uppercase;
+letter-spacing: 0.1em;
+color: #8FA0C9;
+margin-top: 2px;
+}
+#startBtn {
+margin-top: 28px;
+padding: 14px 40px;
+border: none;
+border-radius: 999px;
+background: linear-gradient(135deg, #F0C05A, #C1663B);
+color: #0E1530;
+font-family: 'Manrope', sans-serif;
+font-weight: 800;
+font-size: 17px;
+letter-spacing: 0.02em;
+cursor: pointer;
+box-shadow: 0 6px 20px rgba(193, 102, 59, 0.4);
+}
+#startBtn:active { transform: scale(0.96); }
+#hint {
+position: absolute;
+bottom: 22px;
+left: 0; right: 0;
+text-align: center;
+color: rgba(244, 228, 200, 0.55);
+font-size: 12px;
+letter-spacing: 0.05em;
+pointer-events: none;
+}
+.hidden { display: none !important; }
+#adBreak {
+position: absolute;
+inset: 0;
+background: rgba(14,21,48,0.95);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+color: #8FA0C9;
+text-align: center;
+padding: 24px;
+}
+#adBreak .box {
+border: 1px dashed rgba(240,192,90,0.4);
+border-radius: 14px;
+padding: 28px 24px;
+max-width: 300px;
+}
+#adBreak .box strong {
+color: #F0C05A;
+display: block;
+margin-bottom: 8px;
+font-family: 'Cinzel', serif;
+font-size: 18px;
+}
+#adBreak .box p { font-size: 13px; line-height: 1.5; }
+#adBreak button {
+margin-top: 18px;
+background: transparent;
+border: 1px solid #F0C05A;
+color: #F0C05A;
+padding: 8px 22px;
+border-radius: 999px;
+font-weight: 700;
+cursor: pointer;
+}
+.menu-row { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; justify-content: center; }
+.menu-btn {
+padding: 14px 28px;
+border: none;
+border-radius: 999px;
+font-family: 'Manrope', sans-serif;
+font-weight: 800;
+font-size: 15px;
+letter-spacing: 0.02em;
+cursor: pointer;
+}
+.menu-btn.primary {
+background: linear-gradient(135deg, #F0C05A, #C1663B);
+color: #0E1530;
+box-shadow: 0 6px 20px rgba(193, 102, 59, 0.4);
+}
+.menu-btn.secondary {
+background: transparent;
+border: 1px solid rgba(240,192,90,0.5);
+color: #F0C05A;
+}
+#shopOverlay {
+position: absolute;
+inset: 0;
+background: rgba(14,21,48,0.97);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 24px;
+color: #F4E4C8;
+}
+#shopOverlay h2 { font-family: 'Cinzel', serif; color: #F0C05A; font-size: 24px; margin-bottom: 4px; }
+#shopOverlay .balance { color: #C9B8A0; font-size: 13px; margin-bottom: 20px; }
+#shopGrid { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; max-width: 360px; }
+.skin-card {
+width: 96px;
+background: rgba(255,255,255,0.04);
+border: 1px solid rgba(240,192,90,0.25);
+border-radius: 12px;
+padding: 10px 8px;
+text-align: center;
+cursor: pointer;
+}
+.skin-card.owned { border-color: rgba(120,200,140,0.5); }
+.skin-card.selected { border-color: #F0C05A; box-shadow: 0 0 0 2px rgba(240,192,90,0.4) inset; }
+.skin-swatch { width: 40px; height: 40px; border-radius: 8px; margin: 0 auto 8px; }
+.skin-card .price { font-size: 11px; color: #F0C05A; font-weight: 700; margin-top: 4px; }
+.skin-card .name { font-size: 11px; color: #C9B8A0; }
+#shopClose {
+margin-top: 22px;
+background: transparent;
+border: 1px solid rgba(244,228,200,0.35);
+color: #F4E4C8;
+padding: 8px 24px;
+border-radius: 999px;
+cursor: pointer;
+}
+.powerup-badge {
+position: absolute;
+top: 60px;
+left: 0; right: 0;
+text-align: center;
+color: #8FE0C9;
+font-weight: 800;
+font-size: 13px;
+letter-spacing: 0.05em;
+pointer-events: none;
+text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+<canvas id="game" width="400" height="700"></canvas>
+<div id="hud" class="hidden">
+<div class="hud-pill">Skor <span id="scoreVal">0</span></div>
+<div class="hud-pill gold">🪙 <span id="coinVal">0</span></div>
+</div>
+<div id="hint" class="hidden">dokun ya da boşluk = zıpla</div>
+<div id="overlay">
+<h1>Çatıüstü Koşusu</h1>
+<div class="sub">Gün batımında İstanbul çatılarında koş, martılardan kaç, boşlukları atla, altın topla.</div>
+<div class="stat-row">
+<div class="stat"><div class="num" id="bestScore">0</div><div class="lbl">En İyi Skor</div></div>
+<div class="stat"><div class="num" id="totalCoin">0</div><div class="lbl">Toplam Altın</div></div>
+</div>
+<div class="menu-row">
+<button id="startBtn" class="menu-btn primary">Koşmaya Başla</button>
+<button id="shopBtn" class="menu-btn secondary">Mağaza</button>
+</div>
+</div>
+<div id="shopOverlay" class="hidden">
+<h2>Mağaza</h2>
+<div class="balance">Bakiye: 🪙 <span id="shopBalance">0</span></div>
+<div id="shopGrid"></div>
+<button id="shopClose">Kapat</button>
+</div>
+<div class="powerup-badge hidden" id="powerupBadge"></div>
+<div id="adBreak" class="hidden">
+<div class="box">
+<strong>Reklam Molası</strong>
+<p>Gerçek bir sürümde burada 15-30 sn'lik bir ödüllü reklam gösterilir (ör. Google AdMob). Şimdilik simülasyon — devam etmek için dokun.</p>
+<button id="adContinue">Devam Et</button>
+</div>
+</div>
+</div>
+<script>
+(function(){
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const overlay = document.getElementById('overlay');
+const hud = document.getElementById('hud');
+const hint = document.getElementById('hint');
+const scoreVal = document.getElementById('scoreVal');
+const coinVal = document.getElementById('coinVal');
+const bestScoreEl = document.getElementById('bestScore');
+const totalCoinEl = document.getElementById('totalCoin');
+const startBtn = document.getElementById('startBtn');
+const adBreak = document.getElementById('adBreak');
+const adContinue = document.getElementById('adContinue');
+const shopBtn = document.getElementById('shopBtn');
+const shopOverlay = document.getElementById('shopOverlay');
+const shopGrid = document.getElementById('shopGrid');
+const shopClose = document.getElementById('shopClose');
+const shopBalance = document.getElementById('shopBalance');
+const powerupBadge = document.getElementById('powerupBadge');
+let bestScore = 0;
+let totalCoins = 0;
+let deathCount = 0;
+const SKINS = [
+{ id: 'default', name: 'Klasik', color: '#1A1A1A', price: 0, owned: true },
+{ id: 'sultan',  name: 'Sultan', color: '#8B2E2E', price: 150, owned: false },
+{ id: 'gold',    name: 'Altın',  color: '#C99A2E', price: 400, owned: false },
+{ id: 'mystic',  name: 'Gece',   color: '#3E2E6E', price: 250, owned: false },
+];
+let selectedSkin = 'default';
+const GROUND_Y = H - 130;
+const GRAVITY = 0.62;
+const JUMP_V = -12.5;
+let state = 'menu';
+let player, platforms, gulls, coins, particles, magnets;
+let speed, score, sessionCoins, frame, spawnTimer, gullTimer, coinTimer, magnetSpawnTimer, magnetActive;
+function resetGame(){
+player = { x: 80, y: GROUND_Y - 40, w: 34, h: 40, vy: 0, onGround: true, rot: 0 };
+platforms = [{ x: 0, w: 260, y: GROUND_Y }];
+gulls = [];
+coins = [];
+magnets = [];
+particles = [];
+speed = 4.4;
+score = 0;
+sessionCoins = 0;
+frame = 0;
+spawnTimer = 0;
+gullTimer = 90;
+coinTimer = 60;
+magnetSpawnTimer = 260;
+magnetActive = 0;
+let lastX = 260;
+for(let i=0;i<4;i++){
+const gap = 70 + Math.random()*40;
+const w = 150 + Math.random()*120;
+platforms.push({ x: lastX + gap, w, y: GROUND_Y - Math.random()*40 });
+lastX += gap + w;
+}
+}
+function startGame(){
+resetGame();
+state = 'playing';
+overlay.classList.add('hidden');
+hud.classList.remove('hidden');
+hint.classList.remove('hidden');
+}
+function jump(){
+if(state === 'playing' && player.onGround){
+player.vy = JUMP_V;
+player.onGround = false;
+} else if(state === 'menu'){
+startGame();
+} else if(state === 'dead'){
+startGame();
+}
+}
+window.addEventListener('keydown', (e)=>{
+if(e.code === 'Space'){ e.preventDefault(); jump(); }
+});
+canvas.addEventListener('pointerdown', jump);
+startBtn.addEventListener('click', startGame);
+function renderShop(){
+shopBalance.textContent = totalCoins;
+shopGrid.innerHTML = '';
+SKINS.forEach(skin => {
+const card = document.createElement('div');
+card.className = 'skin-card' + (skin.owned ? ' owned' : '') + (skin.id === selectedSkin ? ' selected' : '');
+card.innerHTML = `
+<div class="skin-swatch" style="background:${skin.color}"></div>
+<div class="name">${skin.name}</div>
+<div class="price">${skin.owned ? (skin.id === selectedSkin ? 'Seçili' : 'Sahipsin') : '🪙 ' + skin.price}</div>
+`;
+card.addEventListener('click', () => {
+if(skin.owned){
+selectedSkin = skin.id;
+} else if(totalCoins >= skin.price){
+totalCoins -= skin.price;
+skin.owned = true;
+selectedSkin = skin.id;
+}
+renderShop();
+});
+shopGrid.appendChild(card);
+});
+}
+shopBtn.addEventListener('click', () => {
+overlay.classList.add('hidden');
+shopOverlay.classList.remove('hidden');
+renderShop();
+});
+shopClose.addEventListener('click', () => {
+shopOverlay.classList.add('hidden');
+overlay.classList.remove('hidden');
+});
+adContinue.addEventListener('click', ()=>{
+adBreak.classList.add('hidden');
+overlay.classList.remove('hidden');
+});
+function spawnPlatform(){
+const last = platforms[platforms.length - 1];
+const gap = 65 + Math.random()*55 + Math.min(score*0.15, 40);
+const w = 120 + Math.random()*130;
+const y = GROUND_Y - Math.random()*50;
+platforms.push({ x: last.x + last.w + gap, w, y });
+}
+function spawnGull(){
+const last = platforms[platforms.length-1];
+gulls.push({ x: W + 40, y: GROUND_Y - 90 - Math.random()*70, w: 30, h: 18, wing: 0 });
+}
+function spawnCoin(){
+const p = platforms[platforms.length-1];
+coins.push({ x: W + 40, y: p.y - 60 - Math.random()*30, r: 9, taken:false, spin:0 });
+}
+function spawnMagnet(){
+const p = platforms[platforms.length-1];
+magnets.push({ x: W + 40, y: p.y - 70 - Math.random()*30 });
+}
+function update(){
+frame++;
+speed = Math.min(4.4 + score*0.012, 9.5);
+player.vy += GRAVITY;
+player.y += player.vy;
+let onAny = false;
+for(const p of platforms){
+const px = p.x - camX;
+if(player.x + player.w*0.6 > px && player.x + player.w*0.2 < px + p.w){
+if(player.y + player.h >= p.y && player.y + player.h <= p.y + 18 && player.vy >= 0){
+player.y = p.y - player.h;
+player.vy = 0;
+player.onGround = true;
+onAny = true;
+}
+}
+}
+if(!onAny) player.onGround = false;
+player.rot = player.onGround ? 0 : Math.max(-0.5, Math.min(0.5, player.vy*0.03));
+if(player.y > H + 60){ die(); return; }
+camX += speed;
+const rightMost = platforms[platforms.length-1];
+if(rightMost.x - camX < W + 100){
+spawnPlatform();
+}
+gullTimer -= 1;
+if(gullTimer <= 0){ spawnGull(); gullTimer = 90 + Math.random()*70 - Math.min(score*0.3,50); }
+coinTimer -= 1;
+if(coinTimer <= 0){ spawnCoin(); coinTimer = 55 + Math.random()*40; }
+magnetSpawnTimer -= 1;
+if(magnetSpawnTimer <= 0){ spawnMagnet(); magnetSpawnTimer = 500 + Math.random()*300; }
+for(const g of gulls){
+g.x -= speed*1.15;
+g.wing += 0.25;
+}
+gulls = gulls.filter(g => g.x > -60);
+for(const m of magnets) m.x -= speed;
+magnets = magnets.filter(m => {
+if(m.x < -40) return false;
+const dx = (player.x + player.w/2) - m.x;
+const dy = (player.y + player.h/2) - m.y;
+if(Math.sqrt(dx*dx+dy*dy) < 26){
+magnetActive = 360;
+return false;
+}
+return true;
+});
+if(magnetActive > 0){
+magnetActive--;
+powerupBadge.textContent = '🧲 Mıknatıs aktif';
+powerupBadge.classList.remove('hidden');
+} else {
+powerupBadge.classList.add('hidden');
+}
+for(const c of coins){
+if(magnetActive > 0){
+const dx = (player.x + player.w/2) - c.x;
+const dy = (player.y + player.h/2) - c.y;
+const dist = Math.max(1, Math.sqrt(dx*dx+dy*dy));
+if(dist < 220){
+c.x += (dx/dist) * 9;
+c.y += (dy/dist) * 9;
+} else {
+c.x -= speed;
+}
+} else {
+c.x -= speed;
+}
+c.spin += 0.2;
+}
+coins = coins.filter(c => c.x > -40 && !c.taken);
+platforms = platforms.filter(p => (p.x - camX + p.w) > -50);
+const pxScreen = player.x;
+for(const g of gulls){
+const gx = g.x;
+if(pxScreen < gx + g.w && pxScreen + player.w > gx &&
+player.y < g.y + g.h && player.y + player.h > g.y){
+die();
+return;
+}
+}
+for(const c of coins){
+if(c.taken) continue;
+const dx = (player.x + player.w/2) - c.x;
+const dy = (player.y + player.h/2) - c.y;
+if(Math.sqrt(dx*dx+dy*dy) < c.r + 16){
+c.taken = true;
+sessionCoins++;
+for(let i=0;i<6;i++){
+particles.push({x:c.x,y:c.y,vx:(Math.random()-0.5)*4,vy:(Math.random()-1.5)*3,life:20,color:'#F0C05A'});
+}
+}
+}
+for(const pt of particles){ pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.15; pt.life--; }
+particles = particles.filter(p=>p.life>0);
+score += speed*0.045;
+scoreVal.textContent = Math.floor(score);
+coinVal.textContent = sessionCoins;
+}
+let camX = 0;
+function die(){
+state = 'dead';
+deathCount++;
+bestScore = Math.max(bestScore, Math.floor(score));
+totalCoins += sessionCoins;
+hud.classList.add('hidden');
+hint.classList.add('hidden');
+bestScoreEl.textContent = bestScore;
+totalCoinEl.textContent = totalCoins;
+if(deathCount % 3 === 0){
+state = 'adbreak';
+adBreak.classList.remove('hidden');
+} else {
+overlay.classList.remove('hidden');
+overlay.querySelector('h1').textContent = 'Çattın!';
+overlay.querySelector('.sub').textContent = 'Skor: ' + Math.floor(score) + '  •  Toplanan altın: ' + sessionCoins;
+startBtn.textContent = 'Tekrar Dene';
+}
+}
+function drawSky(){
+const g = ctx.createLinearGradient(0,0,0,H);
+g.addColorStop(0, '#16213E');
+g.addColorStop(0.55, '#3A3B6E');
+g.addColorStop(0.8, '#7A5C7E');
+g.addColorStop(1, '#E8967A');
+ctx.fillStyle = g;
+ctx.fillRect(0,0,W,H);
+ctx.fillStyle = '#F0C05A';
+ctx.beginPath();
+ctx.arc(W*0.75, H*0.32, 46, 0, Math.PI*2);
+ctx.fill();
+ctx.fillStyle = 'rgba(20,20,45,0.55)';
+const off = (camX*0.15) % 220;
+for(let i=-1;i<4;i++){
+const bx = i*220 - off;
+ctx.beginPath();
+ctx.moveTo(bx, GROUND_Y+40);
+ctx.lineTo(bx, GROUND_Y-40);
+ctx.arc(bx+30, GROUND_Y-40, 30, Math.PI, 0);
+ctx.lineTo(bx+60, GROUND_Y+40);
+ctx.fill();
+ctx.fillRect(bx+90, GROUND_Y-90, 6, 130);
+ctx.beginPath();
+ctx.arc(bx+93, GROUND_Y-90, 6, Math.PI, 0);
+ctx.fill();
+}
+}
+function drawPlatforms(){
+for(const p of platforms){
+const x = p.x - camX;
+if(x + p.w < 0 || x > W) continue;
+ctx.fillStyle = '#C1663B';
+ctx.fillRect(x, p.y, p.w, H - p.y);
+ctx.fillStyle = '#A6532C';
+ctx.fillRect(x, p.y, p.w, 8);
+if(p.w > 180){
+ctx.fillStyle = '#F0C05A';
+ctx.beginPath();
+ctx.arc(x + p.w/2, p.y, 10, Math.PI, 0);
+ctx.fill();
+}
+}
+}
+function drawPlayer(){
+ctx.save();
+ctx.translate(player.x + player.w/2, player.y + player.h/2);
+ctx.rotate(player.rot);
+const skin = SKINS.find(s => s.id === selectedSkin) || SKINS[0];
+ctx.fillStyle = skin.color;
+ctx.beginPath();
+ctx.roundRect(-player.w/2, -player.h/2, player.w, player.h, 8);
+ctx.fill();
+ctx.fillStyle = '#C1663B';
+ctx.fillRect(-player.w/2+4, -player.h/2, player.w-8, 8);
+if(magnetActive > 0){
+ctx.strokeStyle = 'rgba(143,224,201,0.6)';
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.arc(0, 0, player.w*0.9, 0, Math.PI*2);
+ctx.stroke();
+}
+ctx.restore();
+}
+function drawMagnets(){
+for(const m of magnets){
+ctx.save();
+ctx.translate(m.x, m.y);
+ctx.fillStyle = '#8FE0C9';
+ctx.beginPath();
+ctx.arc(0,0,13,Math.PI*0.15, Math.PI*0.85);
+ctx.lineTo(4,10); ctx.lineTo(-4,10);
+ctx.closePath();
+ctx.fill();
+ctx.fillStyle = '#0E1530';
+ctx.fillRect(-13,-3,7,10);
+ctx.fillRect(6,-3,7,10);
+ctx.restore();
+}
+}
+function drawGulls(){
+ctx.fillStyle = '#F4E4C8';
+for(const g of gulls){
+const flap = Math.sin(g.wing)*8;
+ctx.beginPath();
+ctx.moveTo(g.x, g.y);
+ctx.quadraticCurveTo(g.x+g.w/2, g.y-flap, g.x+g.w, g.y);
+ctx.quadraticCurveTo(g.x+g.w/2, g.y+6, g.x, g.y);
+ctx.fill();
+}
+}
+function drawCoins(){
+for(const c of coins){
+if(c.taken) continue;
+ctx.save();
+ctx.translate(c.x, c.y);
+const sx = Math.cos(c.spin);
+ctx.scale(Math.max(0.2,Math.abs(sx)), 1);
+ctx.fillStyle = '#F0C05A';
+ctx.beginPath();
+ctx.arc(0,0,c.r,0,Math.PI*2);
+ctx.fill();
+ctx.restore();
+}
+}
+function drawParticles(){
+for(const p of particles){
+ctx.globalAlpha = Math.max(0, p.life/20);
+ctx.fillStyle = p.color;
+ctx.beginPath();
+ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+ctx.fill();
+ctx.globalAlpha = 1;
+}
+}
+function render(){
+drawSky();
+drawPlatforms();
+drawGulls();
+drawMagnets();
+drawCoins();
+drawPlayer();
+drawParticles();
+}
+function loop(){
+if(state === 'playing'){
+update();
+}
+render();
+requestAnimationFrame(loop);
+}
+resetGame();
+render();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
