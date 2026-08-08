@@ -485,8 +485,8 @@ platforms = platforms.filter(p => (p.x - camX + p.w) > -50);
 const pxScreen = player.x;
 for(const g of gulls){
 const gx = g.x;
-if(pxScreen < gx + g.w && pxScreen + player.w > gx &&
-player.y < g.y + g.h && player.y + player.h > g.y){
+if(pxScreen+6 < gx + g.w-6 && pxScreen + player.w-6 > gx+6 &&
+player.y+6 < g.y + g.h-6 && player.y + player.h-6 > g.y+6){
 die();
 return;
 }
