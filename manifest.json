@@ -1,0 +1,31 @@
+{
+  "name": "Çatıüstü Koşusu",
+  "short_name": "Çatıüstü Koşusu",
+  "description": "İstanbul gün batımında çatılar üzerinde koşan, martılardan kaçan ve altın toplayan bir koşu oyunu.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#0E1530",
+  "theme_color": "#0E1530",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
