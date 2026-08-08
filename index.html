@@ -400,7 +400,7 @@ platforms.push({ x: last.x + last.w + gap, w, y });
 }
 function spawnGull(){
 const last = platforms[platforms.length-1];
-gulls.push({ x: W + 40, y: GROUND_Y - 90 - Math.random()*70, w: 30, h: 18, wing: 0 });
+gulls.push({ x: W + 40, y: GROUND_Y - 55 - Math.random()*35, w: 30, h: 18, wing: 0 }); 
 }
 function spawnCoin(){
 const p = platforms[platforms.length-1];
@@ -436,7 +436,7 @@ if(rightMost.x - camX < W + 100){
 spawnPlatform();
 }
 gullTimer -= 1;
-if(gullTimer <= 0){ spawnGull(); gullTimer = 90 + Math.random()*70 - Math.min(score*0.3,50); }
+if(gullTimer <= 0){ spawnGull(); gullTimer = 140 + Math.random()*90 - Math.min(score*0.2,60); }
 coinTimer -= 1;
 if(coinTimer <= 0){ spawnCoin(); coinTimer = 55 + Math.random()*40; }
 magnetSpawnTimer -= 1;
